@@ -6,25 +6,27 @@ import ManageList from "./pages/ManageList";
 import SearchPage from "./pages/Search";
 import ErrorPage from "./pages/ErrorPage";
 import MusicPlayerBar from "./components/MusicPlayerBar/MusicPlayerBar";
+import ContextIndex from "./contexts";
 
 function App() {
   return (
     <div className="App">
-      <header className="">
-        <NavigationBar />
-      </header>
-      <div className="h-screen">
-        <Routes>
-          <Route path="*" element={<ErrorPage />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/manage-music" element={<ManageList />} />
-          <Route path="/search" element={<SearchPage />} />
-        </Routes>
-      </div>
-
-      <div className="sticky bottom-0">
-        <MusicPlayerBar></MusicPlayerBar>
-      </div>
+      <ContextIndex>
+        <header className="">
+          <NavigationBar />
+        </header>
+        <div className="h-screen">
+          <Routes>
+            <Route path="*" element={<ErrorPage />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/manage-music" element={<ManageList />} />
+            <Route path="/search" element={<SearchPage />} />
+          </Routes>
+        </div>
+        <div className="sticky bottom-0">
+          <MusicPlayerBar></MusicPlayerBar>
+        </div>
+      </ContextIndex>
     </div>
   );
 }

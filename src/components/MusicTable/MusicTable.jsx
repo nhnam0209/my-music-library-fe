@@ -10,6 +10,8 @@ import { Buffer } from "buffer";
 function MusicTable() {
   const [isOpen, setIsOpen] = useState(false);
   const [musicData, setMusicData] = useState(null);
+  const [musicItem, setMusicItem] = useState(null);
+
   useEffect(() => {
     try {
       axios
@@ -30,7 +32,6 @@ function MusicTable() {
     setIsOpen(false);
   };
   const handleDeleteMusic = async (item) => {
-    console.log("delete");
     try {
       const res = await axios.delete(
         `${process.env.REACT_APP_API_URL + "/delete"}`,
@@ -46,8 +47,9 @@ function MusicTable() {
       console.log(error);
     }
   };
-  const handleEditMusic = () => {
+  const handleEditMusic = (item) => {
     handleOpenModal();
+    setMusicItem(item);
   };
 
   return (
@@ -79,17 +81,13 @@ function MusicTable() {
             </tr>
           ) : (
             musicData.map((item) => {
-              const imageURL = Buffer.from(item.image);
-              const base64Image = `data:image/jpeg;base64, ${imageURL.toString(
-                "base64"
-              )}`;
               return (
                 <tr key={item.id}>
                   <td>{item.id}</td>
                   <td className="flex justify-center">
                     <img
                       className="w-24 h-24"
-                      src={base64Image}
+                      src={item.image}
                       alt="cover_image"
                     />
                   </td>
@@ -98,13 +96,13 @@ function MusicTable() {
                   <td>{item.album}</td>
                   <td>{item.genre}</td>
                   <td>{item.release_year}</td>
-                  <td>3:12</td>
+                  <td>{!item.duration ? "0s" : item.duration + "s"}</td>
                   <td>
                     <div className="flex justify-center">
                       <div className="inline-flex align-middle mx-auto">
                         <span
                           className="cursor-pointer mx-2"
-                          onClick={handleEditMusic}
+                          onClick={() => handleEditMusic(item)}
                         >
                           {" "}
                           <EditIcon props={{ fillColor: "black" }}></EditIcon>
@@ -121,8 +119,9 @@ function MusicTable() {
                     <div>
                       {isOpen && (
                         <EditMusicForm
-                          props={{ isOpen: isOpen, data: item }}
+                          props={{ isOpen: isOpen, data: musicItem }}
                           onClose={handleCloseModal}
+                          onEdit={() => handleEditMusic(item)}
                         ></EditMusicForm>
                       )}
                     </div>

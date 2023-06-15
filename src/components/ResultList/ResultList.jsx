@@ -1,36 +1,31 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./resultlist.css";
-function ResultList() {
-  const resultItems = [
-    {
-      id: 1,
-      title: "Animals",
-      artist: "Martin Garrix",
-      genre: "EDM",
-      release_year: "2012",
-      album: "Animals",
-    },
-    {
-      id: 2,
-      title: "Levels",
-      artist: "Avicii",
-      genre: "EDM",
-      release_year: "2012",
-      album: "Animals",
-    },
-    {
-      id: 3,
-      title: "Believer",
-      artist: "Imagine Dragon",
-      genre: "Rock",
-      release_year: "2012",
-      album: "Believer",
-    },
-  ];
+
+function ResultList({ props }) {
+  const [resultItems, setResultItems] = useState([]);
+  const [isPlay, setIsPlay] = useState(false);
+  // const [audioItem, setAudioItem] = useState("");
+
+  useEffect(() => {
+    if (localStorage.getItem("search_result")) {
+      setResultItems(JSON.parse(localStorage.getItem("search_result")));
+    }
+  }, []);
+
+  const handlePlay = (item) => {
+    isPlay ? setIsPlay(false) : setIsPlay(true);
+    const audio = new Audio(item.audio);
+    if (isPlay) {
+      audio.pause();
+    } else {
+      audio.pause();
+    }
+  };
+
   const resultItem = resultItems.map((item) => {
     return (
       <div className="music-card text-left" key={item.id}>
-        <img src="/test.jpg" alt={item.title} />
+        <img src={item.image} alt={item.title} />
         <div className="music-details">
           <div className="grid grid-cols-2">
             <div>
@@ -51,7 +46,9 @@ function ResultList() {
               </p>
             </div>
           </div>
-          <button>Play</button>
+          <button onClick={() => handlePlay(item)}>
+            {isPlay ? "Pause" : "Play"}
+          </button>
         </div>
       </div>
     );

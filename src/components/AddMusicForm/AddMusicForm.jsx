@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./addmusicform.css";
 import axios from "axios";
 import { Input } from "antd";
@@ -15,8 +15,22 @@ function AddMusicForm({ props, onClose }) {
     album: "",
     genre: "",
     release_year: "",
+    duration: "",
     imageFile: imageFileURL,
     audioFile: audioFileURL,
+  });
+  const [duration, setDuration] = useState(0);
+  useEffect(() => {
+    if (audioFileURL != null) {
+      const audio = new Audio();
+      audio.src = audioFileURL;
+      audio.addEventListener("loadedmetadata", () => {
+        setDuration(audio.duration.toFixed(2));
+      });
+      audio.addEventListener("error", () => {
+        console.error("Error loading audio file");
+      });
+    }
   });
 
   const generateID = () => {
@@ -35,27 +49,52 @@ function AddMusicForm({ props, onClose }) {
     const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = (event) => {
-      setAudioFile(event.target.result);
+      const base64Audio = btoa(event.target.result);
+      setAudioFile(base64Audio);
       setAudioFileURL(URL.createObjectURL(file));
     };
-    reader.readAsDataURL(file);
+    reader.readAsBinaryString(file);
   };
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setImageFile(event.target.result);
-      setImageFileURL(URL.createObjectURL(file));
+    const img = new Image();
+    setImageFile(file);
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const MAX_WIDTH = 800;
+      const MAX_HEIGHT = 600;
+      let width = img.width;
+      let height = img.height;
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+      setImageFileURL(dataUrl);
     };
-    reader.readAsDataURL(file);
+    img.src = URL.createObjectURL(file);
   };
 
   const handleAddMusic = async (event) => {
     event.preventDefault();
     formData.id = generateID();
-    formData.audioFile = audioFile;
-    formData.imageFile = imageFile;
+    formData.audioFile = audioFileURL;
+    formData.imageFile = imageFileURL;
+    formData.duration = duration;
     try {
       const res = await axios.post(
         `${process.env.REACT_APP_API_URL + "/add"}`,
@@ -156,6 +195,16 @@ function AddMusicForm({ props, onClose }) {
                     accept="audio/*"
                     onChange={handleAudioUpload}
                     required
+                  />
+                </div>
+                <div className="form-row">
+                  <label className="form-label">Duration</label>
+                  <Input
+                    className="form-input"
+                    type="text"
+                    value={duration + "s"}
+                    name="duration"
+                    readOnly={true}
                   />
                 </div>
                 <button

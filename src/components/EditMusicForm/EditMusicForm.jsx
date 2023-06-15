@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./editmusicform.css";
 import { Input } from "antd";
 import axios from "axios";
 
-function AddMusicForm({ props, onClose }) {
+function AddMusicForm({ props, onClose, onEdit }) {
   const [audioFile, setAudioFile] = useState(null);
   const [audioFileURL, setAudioFileURL] = useState(null);
   const [imageFile, setImageFile] = useState(null);
@@ -14,9 +14,24 @@ function AddMusicForm({ props, onClose }) {
     artist: "",
     album: "",
     genre: "",
-    releaseYear: "",
+    release_year: "",
+    duration: "",
     audioFile: audioFileURL,
     imageFile: imageFileURL,
+  });
+
+  const [duration, setDuration] = useState(0);
+  useEffect(() => {
+    if (audioFileURL != null) {
+      const audio = new Audio();
+      audio.src = audioFileURL;
+      audio.addEventListener("loadedmetadata", () => {
+        setDuration(Math.floor(audio.duration));
+      });
+      audio.addEventListener("error", () => {
+        console.error("Error loading audio file");
+      });
+    }
   });
 
   const handleInputChange = (event) => {
@@ -31,27 +46,53 @@ function AddMusicForm({ props, onClose }) {
     const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = (event) => {
-      setAudioFile(event.target.result);
+      const base64Audio = btoa(event.target.result);
+      setAudioFile(base64Audio);
       setAudioFileURL(URL.createObjectURL(file));
     };
-    reader.readAsDataURL(file);
+    reader.readAsBinaryString(file);
+    console.log(duration);
   };
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setImageFile(event.target.result);
-      setImageFileURL(URL.createObjectURL(file));
+    const img = new Image();
+    setImageFile(file);
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const MAX_WIDTH = 800;
+      const MAX_HEIGHT = 600;
+      let width = img.width;
+      let height = img.height;
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+      setImageFileURL(dataUrl);
     };
-    reader.readAsDataURL(file);
+    img.src = URL.createObjectURL(file);
   };
 
   const handleEditMusic = async (event) => {
     event.preventDefault();
     formData.id = props.data.id;
-    formData.audioFile = audioFile;
-    formData.imageFile = imageFile;
+    formData.audioFile = audioFileURL;
+    formData.imageFile = imageFileURL;
+    formData.duration = duration;
     console.log(formData);
     try {
       const res = await axios.put(
@@ -127,7 +168,7 @@ function AddMusicForm({ props, onClose }) {
                   <Input
                     className="form-input"
                     type="text"
-                    name="releaseYear"
+                    name="release_year"
                     value={formData.release_year}
                     placeholder={props.data.release_year}
                     onChange={handleInputChange}
@@ -151,6 +192,20 @@ function AddMusicForm({ props, onClose }) {
                     name="audioFile"
                     accept="audio/*"
                     onChange={handleAudioUpload}
+                  />
+                </div>
+                <div className="form-row">
+                  <label className="form-label">Duration</label>
+                  <Input
+                    className="form-input"
+                    type="text"
+                    value={
+                      !duration !== 0
+                        ? duration + "s"
+                        : props.data.duration + "s"
+                    }
+                    name="duration"
+                    readOnly={true}
                   />
                 </div>
                 <button
