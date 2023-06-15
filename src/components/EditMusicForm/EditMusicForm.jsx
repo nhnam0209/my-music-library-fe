@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import "./addmusicform.css";
-import axios from "axios";
+import "./editmusicform.css";
 import { Input } from "antd";
+import axios from "axios";
 
 function AddMusicForm({ props, onClose }) {
   const [audioFile, setAudioFile] = useState(null);
@@ -14,14 +14,10 @@ function AddMusicForm({ props, onClose }) {
     artist: "",
     album: "",
     genre: "",
-    release_year: "",
-    imageFile: imageFileURL,
+    releaseYear: "",
     audioFile: audioFileURL,
+    imageFile: imageFileURL,
   });
-
-  const generateID = () => {
-    return Math.floor(Math.random() * 1000000);
-  };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -51,14 +47,15 @@ function AddMusicForm({ props, onClose }) {
     reader.readAsDataURL(file);
   };
 
-  const handleAddMusic = async (event) => {
+  const handleEditMusic = async (event) => {
     event.preventDefault();
-    formData.id = generateID();
+    formData.id = props.data.id;
     formData.audioFile = audioFile;
     formData.imageFile = imageFile;
+    console.log(formData);
     try {
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL + "/add"}`,
+      const res = await axios.put(
+        `${process.env.REACT_APP_API_URL + "/edit"}`,
         formData
       );
       alert(res.data.msg);
@@ -77,10 +74,10 @@ function AddMusicForm({ props, onClose }) {
             <button className="modal-close-button" onClick={onClose}>
               X
             </button>
-            <span className="m-4 text-xl font-bold">Add Music</span>
+            <span className="m-4 text-xl font-bold">Edit Music</span>
 
             <div className="modal-content flex-col p-5">
-              <form onSubmit={handleAddMusic}>
+              <form onSubmit={handleEditMusic}>
                 <div className="form-row">
                   <label className="form-label">Title</label>
                   <Input
@@ -89,7 +86,7 @@ function AddMusicForm({ props, onClose }) {
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    required
+                    placeholder={props.data.title}
                   />
                 </div>
                 <div className="form-row">
@@ -99,8 +96,8 @@ function AddMusicForm({ props, onClose }) {
                     type="text"
                     name="artist"
                     value={formData.artist}
+                    placeholder={props.data.artist}
                     onChange={handleInputChange}
-                    required
                   />
                 </div>
                 <div className="form-row">
@@ -110,8 +107,8 @@ function AddMusicForm({ props, onClose }) {
                     type="text"
                     name="album"
                     value={formData.album}
+                    placeholder={props.data.album}
                     onChange={handleInputChange}
-                    required
                   />
                 </div>
                 <div className="form-row">
@@ -121,8 +118,8 @@ function AddMusicForm({ props, onClose }) {
                     type="text"
                     name="genre"
                     value={formData.genre}
+                    placeholder={props.data.genre}
                     onChange={handleInputChange}
-                    required
                   />
                 </div>
                 <div className="form-row">
@@ -130,10 +127,10 @@ function AddMusicForm({ props, onClose }) {
                   <Input
                     className="form-input"
                     type="text"
-                    name="release_year"
+                    name="releaseYear"
                     value={formData.release_year}
+                    placeholder={props.data.release_year}
                     onChange={handleInputChange}
-                    required
                   />
                 </div>
                 <div className="form-row">
@@ -144,7 +141,6 @@ function AddMusicForm({ props, onClose }) {
                     name="imageFile"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    required
                   />
                 </div>
                 <div className="form-row">
@@ -155,7 +151,6 @@ function AddMusicForm({ props, onClose }) {
                     name="audioFile"
                     accept="audio/*"
                     onChange={handleAudioUpload}
-                    required
                   />
                 </div>
                 <button

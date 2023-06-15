@@ -10,6 +10,11 @@
   align-items: center;
 }
 
+input[required]+label:after {
+  content: '*';
+  color: red;
+}
+
 .modal {
   position: relative;
   background-color: white;
@@ -48,4 +53,3 @@
 .form-input {
   flex-basis: 70%;
 }
-

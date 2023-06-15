@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./musicplayerbar.css";
-import useSound from "use-sound";
+// import useSound from "use-sound";
 
 function MusicPlayerBar({ props }) {
   const [isPlaying, setIsPlaying] = useState(false);

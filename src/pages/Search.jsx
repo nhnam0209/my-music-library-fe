@@ -1,5 +1,5 @@
 import React from "react";
-import SearchBar from "../components/Search/SearchBar";
+import SearchBar from "../components/SearchBar/SearchBar";
 import ResultList from "../components/ResultList/ResultList";
 
 function SearchPage() {
