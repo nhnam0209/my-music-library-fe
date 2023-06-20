@@ -93,7 +93,6 @@ function AddMusicForm({ props, onClose, onEdit }) {
     formData.audioFile = audioFileURL;
     formData.imageFile = imageFileURL;
     formData.duration = duration;
-    console.log(formData);
     try {
       const res = await axios.put(
         `${process.env.REACT_APP_API_URL + "/edit"}`,

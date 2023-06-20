@@ -5,7 +5,6 @@ import DeleteIcon from "../Logos/IconDelete/Delete";
 import EditMusicForm from "../EditMusicForm/EditMusicForm";
 import { useState } from "react";
 import axios from "axios";
-import { Buffer } from "buffer";
 
 function MusicTable() {
   const [isOpen, setIsOpen] = useState(false);
